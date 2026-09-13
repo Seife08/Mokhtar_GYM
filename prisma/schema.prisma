@@ -1,0 +1,549 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============ USERS & PROFILES ============
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  role         String    @default("CLIENT") // ADMIN | CLIENT
+  status       String    @default("ACTIVE") // ACTIVE | INACTIVE | DELETED
+  onboarding   Boolean   @default(false)
+  // profile
+  firstName    String?
+  lastName     String?
+  phone        String?
+  dob          DateTime?
+  gender       String? // male | female | undisclosed
+  avatar       String? // stored path
+  language     String    @default("ar")
+  qrToken      String    @unique @default(cuid())
+  lastLoginAt  DateTime?
+  // email ownership confirmed (verification code / Facebook)
+  emailVerifiedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships     Membership[]
+  payments        Payment[]
+  attendances     Attendance[]
+  clientWorkouts  ClientWorkout[]
+  progressEntries ProgressEntry[]
+  progressPhotos  ProgressPhoto[]
+  clientDiets     ClientDiet[]
+  bookings        Booking[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  favoriteExercises ExerciseFavorite[]
+  customPrograms  WorkoutProgram[] @relation("CustomProgramOwner")
+  oauthAccounts     OAuthAccount[]
+
+  @@index([role])
+  @@index([status])
+  @@index([firstName, lastName])
+}
+
+// ============ PASSWORDLESS AUTH =================
+
+// One-time 6-digit login codes emailed to members ("sign in with email").
+// Only the scrypt hash is stored; codes expire after 10 minutes and
+// self-destruct after too many verification attempts.
+model EmailVerificationCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  requestIp  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([email, createdAt])
+}
+
+// Linked social identities (Facebook …). A member may have several
+// providers attached to the same account; provider ids never collide.
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  provider          String // "facebook"
+  providerAccountId String
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  email             String?
+  name              String?
+  avatarUrl         String?
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// ============ GYM & SETTINGS ============
+
+// Structured opening hours: separate weekly schedule per section
+// (men / women). Day slots are stored in minutes-from-midnight so
+// overlap validation and "open now" checks are pure integer math.
+model GymSchedule {
+  id        String         @id @default(cuid())
+  gender    String // "MALE" | "FEMALE"
+  dayOfWeek Int // ISO: 1 = Monday … 7 = Sunday
+  isOpen    Boolean        @default(true)
+  note      String?
+  slots     GymSlot[]
+  updatedAt DateTime       @updatedAt
+
+  @@unique([gender, dayOfWeek])
+  @@index([gender])
+}
+
+model GymSlot {
+  id         String       @id @default(cuid())
+  scheduleId String
+  schedule   GymSchedule  @relation(fields: [scheduleId], references: [id])
+  startMin   Int // 0…1439 — minutes from midnight
+  endMin     Int // 1…1440
+  label      String? // optional: "morning", "ladies only", …
+  order      Int          @default(0)
+
+  @@index([scheduleId])
+}
+
+model GymSettings {
+  id             String   @id @default("main")
+  gymName        String   @default("MOKHTAR GYM")
+  phone          String?
+  whatsapp       String?
+  address        String?
+  mapsUrl        String?
+  hours          String?
+  facebook       String?
+  instagram      String?
+  tiktok         String?
+  defaultLang    String   @default("ar")
+  currency       String   @default("DZD")
+  setupCompleted Boolean  @default(false)
+  // business rules
+  expiringSoonDays  Int      @default(7)
+  gracePeriodDays   Int      @default(0)
+  doubleCheckinMins Int      @default(120)
+  cancelWindowHours Int      @default(2)
+  reminderOffsets   String   @default("30,7,3,1") // days before expiry
+  timezone          String   @default("Africa/Algiers")
+  // ---- email login codes (SMTP) ----
+  smtpHost        String? // e.g. smtp.brevo.com — null = email login runs in dev mode
+  smtpPort        Int?
+  smtpSecure      Boolean  @default(true)
+  smtpUser        String?
+  smtpPass        String? // AES-256-GCM encrypted at rest
+  smtpFrom        String? // sender address shown to members
+  // ---- Facebook login ----
+  fbAppId         String?
+  fbAppSecret     String? // AES-256-GCM encrypted at rest
+  // ---- Google login ----
+  googleClientId     String?
+  googleClientSecret String? // AES-256-GCM encrypted at rest
+  updatedAt      DateTime @updatedAt
+}
+
+// ============ PLANS & MEMBERSHIPS ============
+
+model MembershipPlan {
+  id            String  @id @default(cuid())
+  nameEn        String
+  nameAr        String
+  nameFr        String
+  descriptionEn String?
+  descriptionAr String?
+  descriptionFr String?
+  features      String? // newline separated
+  durationDays  Int
+  price         Float
+  status        String  @default("ACTIVE") // ACTIVE | ARCHIVED
+  sortOrder     Int     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships Membership[]
+  offers      Offer[]
+}
+
+model Membership {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  planId           String
+  plan             MembershipPlan @relation(fields: [planId], references: [id])
+  startDate        DateTime
+  endDate          DateTime
+  pricePaid        Float
+  status           String   @default("ACTIVE") // ACTIVE | PAUSED | CANCELLED | EXPIRED
+  pausedAt         DateTime?
+  pausedDays       Int      @default(0)
+  createdById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
+}
+
+// ============ PAYMENTS ============
+
+model Payment {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  membershipId  String?
+  membership    Membership? @relation(fields: [membershipId], references: [id])
+  amount        Float
+  method        String // CASH | CCP | BARIDIMOB | BANK | ONLINE | OTHER
+  status        String     @default("PAID") // PAID | PENDING | REFUNDED
+  reference     String?
+  notes         String?
+  paidAt        DateTime   @default(now())
+  recordedById  String?
+  createdAt     DateTime   @default(now())
+
+  @@index([userId])
+  @@index([paidAt])
+  @@index([method])
+}
+
+// ============ ATTENDANCE ============
+
+model Attendance {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  checkInAt  DateTime  @default(now())
+  checkOutAt DateTime?
+  method     String    @default("QR") // QR | NFC | MANUAL
+  notes      String?
+  corrected  Boolean   @default(false)
+
+  @@index([userId])
+  @@index([checkInAt])
+}
+
+// ============ WORKOUTS ============
+
+model WorkoutProgram {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String
+  nameFr      String
+  description String?
+  goal        String? // muscle | strength | fat loss | fitness
+  difficulty  String   @default("INTERMEDIATE") // BEGINNER | INTERMEDIATE | ADVANCED
+  status      String   @default("ACTIVE") // ACTIVE | ARCHIVED
+  // client-built custom program: userId of the owner (null = gym template)
+  createdById String?
+  owner       User?    @relation("CustomProgramOwner", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  days            WorkoutDay[]
+  clientWorkouts  ClientWorkout[]
+}
+
+model WorkoutDay {
+  id        String   @id @default(cuid())
+  programId String
+  program   WorkoutProgram @relation(fields: [programId], references: [id])
+  dayIndex  Int
+  nameEn    String
+  nameAr    String
+  nameFr    String
+  focus     String? // muscle groups csv
+  estMinutes Int    @default(60)
+  // weekly mapping for client-built plans: ISO day 1=Monday … 7=Sunday
+  dayOfWeek Int?
+
+  exercises WorkoutExercise[]
+  logs      WorkoutLog[]
+}
+
+model Exercise {
+  id             String  @id @default(cuid())
+  nameEn         String
+  nameAr         String
+  nameFr         String
+  muscleGroup    String // chest | back | shoulders | biceps | triceps | legs | glutes | abs | calves | fullbody | cardio
+  equipment      String?
+  instructionsEn String?
+  instructionsAr String?
+  instructionsFr String?
+  difficulty     String  @default("INTERMEDIATE")
+  status         String  @default("ACTIVE")
+  emoji          String? // per-exercise icon shown in the client library
+  createdAt      DateTime @default(now())
+
+  workoutExercises WorkoutExercise[]
+  favorites        ExerciseFavorite[]
+}
+
+// Exercises the member marked as favourites — seeds the picker and
+// keeps the builder personalised across sessions.
+model ExerciseFavorite {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, exerciseId])
+  @@index([userId])
+}
+
+model WorkoutExercise {
+  id          String  @id @default(cuid())
+  workoutDayId String
+  workoutDay  WorkoutDay @relation(fields: [workoutDayId], references: [id])
+  exerciseId  String
+  exercise    Exercise   @relation(fields: [exerciseId], references: [id])
+  orderIndex  Int     @default(0)
+  sets        Int     @default(3)
+  reps        Int     @default(10)
+  weight      Float? // prescribed kg
+  restSeconds Int     @default(90)
+  tempo       String?
+  notes       String?
+}
+
+model ClientWorkout {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  programId   String
+  program     WorkoutProgram @relation(fields: [programId], references: [id])
+  startDate   DateTime
+  endDate     DateTime?
+  status      String   @default("ACTIVE") // ACTIVE | COMPLETED | CANCELLED
+  assignedById String?
+  createdAt   DateTime @default(now())
+
+  logs WorkoutLog[]
+
+  @@index([userId])
+}
+
+model WorkoutLog {
+  id               String   @id @default(cuid())
+  clientWorkoutId  String
+  clientWorkout    ClientWorkout @relation(fields: [clientWorkoutId], references: [id])
+  workoutDayId     String
+  workoutDay       WorkoutDay   @relation(fields: [workoutDayId], references: [id])
+  date             DateTime
+  completedExercises String? // csv of workoutExercise ids
+  completedSets    String? // json {exerciseId: setsDone}
+  durationMin      Int?
+  calories         Int?
+  completedAt      DateTime?
+
+  @@index([clientWorkoutId])
+  @@index([date])
+}
+
+// ============ DIET ============
+
+model DietPlan {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String
+  nameFr      String
+  description String?
+  goal        String? // mass | cut | maintain
+  totalCalories Int?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meals       Meal[]
+  clientDiets ClientDiet[]
+}
+
+model Meal {
+  id          String  @id @default(cuid())
+  dietPlanId  String
+  dietPlan    DietPlan @relation(fields: [dietPlanId], references: [id])
+  type        String // breakfast | snack1 | lunch | snack2 | dinner
+  time        String?
+  foods       String // newline separated "3 eggs|2 bread slices|1 banana"
+  calories    Int?
+  protein     Int?
+  carbs       Int?
+  fats        Int?
+  notes       String?
+  orderIndex  Int     @default(0)
+}
+
+model ClientDiet {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  dietPlanId  String
+  dietPlan    DietPlan @relation(fields: [dietPlanId], references: [id])
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ============ PROGRESS ============
+
+model ProgressEntry {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  date     DateTime
+  weight   Float?
+  height   Float?
+  chest    Float?
+  waist    Float?
+  arms     Float?
+  thighs   Float?
+  bodyFat  Float?
+  notes    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([date])
+}
+
+model ProgressPhoto {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  category String // front | side | back
+  dataPath String
+  date     DateTime @default(now())
+  isPrivate Boolean @default(true)
+
+  @@index([userId])
+}
+
+// ============ CLASSES & BOOKINGS ============
+
+model FitnessClass {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String
+  nameFr      String
+  description String?
+  date        DateTime
+  durationMin Int      @default(60)
+  capacity    Int      @default(20)
+  instructor  String?
+  status      String   @default("SCHEDULED") // SCHEDULED | CANCELLED | COMPLETED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([date])
+  @@index([status])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  classId     String
+  fitnessClass FitnessClass @relation(fields: [classId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  bookedAt    DateTime @default(now())
+  status      String   @default("BOOKED") // BOOKED | CANCELLED | ATTENDED | NO_SHOW
+  cancelledAt DateTime?
+  cancelledBy String?
+
+  @@unique([classId, userId])
+  @@index([userId])
+  @@index([classId])
+}
+
+// ============ NOTIFICATIONS / ANNOUNCEMENTS / OFFERS ============
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @default("general") // membership | payment | workout | diet | class | announcement | offer | general
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  image       String?
+  priority    String   @default("NORMAL") // HIGH | NORMAL | LOW
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  status      String   @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  planId      String?
+  plan        MembershipPlan? @relation(fields: [planId], references: [id])
+  originalPrice Float?
+  offerPrice    Float
+  startDate   DateTime @default(now())
+  endDate     DateTime
+  status      String   @default("ACTIVE") // ACTIVE | ARCHIVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ============ AUDIT ============
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id])
+  action    String
+  target    String?
+  entity    String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+}

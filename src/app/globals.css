@@ -1,0 +1,946 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-dark: var(--gold-dark);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * MOKHTAR GYM — Dark premium identity
+ * BLACK dominant · WHITE information · GOLD attention
+ */
+:root {
+  --radius: 0.75rem;
+
+  --background: #080808;
+  --foreground: #f5f5f5;
+  --card: #141414;
+  --card-foreground: #f5f5f5;
+  --popover: #161616;
+  --popover-foreground: #f5f5f5;
+
+  --gold: #f5c400;
+  --gold-bright: #ffd700;
+  --gold-deep: #b8860b;
+  --gold-dark: #8a6500;
+
+  --primary: #f5c400;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1b1b1b;
+  --secondary-foreground: #e5e5e5;
+  --muted: #181818;
+  --muted-foreground: #a3a3a3;
+  --accent: #1f1c10;
+  --accent-foreground: #ffd700;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --destructive: #ef4444;
+  --info: #3b82f6;
+
+  --border: rgba(255, 215, 0, 0.1);
+  --input: #262626;
+  --ring: rgba(245, 196, 0, 0.55);
+
+  --chart-1: #f5c400;
+  --chart-2: #b8860b;
+  --chart-3: #6b5b1e;
+  --chart-4: #8a6500;
+  --chart-5: #57542a;
+
+  --sidebar: #0b0b0b;
+  --sidebar-foreground: #d4d4d4;
+  --sidebar-primary: #f5c400;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #161408;
+  --sidebar-accent-foreground: #ffd700;
+  --sidebar-border: rgba(255, 215, 0, 0.08);
+  --sidebar-ring: rgba(245, 196, 0, 0.5);
+}
+
+.dark {
+  --background: #080808;
+  --foreground: #f5f5f5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body), system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html[lang="ar"] body {
+    font-family: var(--font-arabic), var(--font-body), system-ui, sans-serif;
+  }
+  ::selection {
+    background: rgba(245, 196, 0, 0.28);
+    color: #fff;
+  }
+}
+
+/* ============ DISPLAY TYPE ============ */
+.font-display {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: 0.02em;
+}
+
+[dir="rtl"] .font-display {
+  font-family: var(--font-body), sans-serif;
+}
+
+/* ============ GOLD TEXT ============ */
+.gold-text {
+  background: linear-gradient(115deg, #8a6500 0%, #f5c400 35%, #ffe066 50%, #f5c400 65%, #8a6500 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============ BUTTON METALLIC SHEEN ============
+   A quick diagonal light sweep across gold buttons on hover.
+   Pure transform on a ::after layer — no repaint cost. */
+[data-slot="button"][data-variant="default"]::after,
+.btn-gold::after {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% -70%;
+  width: 45%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.0) 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.0) 65%,
+    transparent 100%
+  );
+  transform: translateX(220%) skewX(-18deg);
+  transition: none;
+}
+[data-slot="button"][data-variant="default"]:hover::after,
+.btn-gold:hover::after {
+  animation: btn-sheen .65s cubic-bezier(.3, .6, .3, 1) forwards;
+}
+@keyframes btn-sheen {
+  from { transform: translateX(220%) skewX(-18deg); }
+  to   { transform: translateX(240%) skewX(-18deg); }
+}
+
+/* ============ TAB CONTENT TRANSITION ============
+   Panels mount with a fast 200ms rise. Snappy — never blocks the user. */
+[data-slot="tabs-content"][data-state="active"] {
+  animation: tab-content-in .2s cubic-bezier(.2, .7, .3, 1);
+}
+@keyframes tab-content-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* icon inside gold buttons keeps readable contrast */
+[data-slot="button"][data-variant="default"] :is(svg, [class*="icon"]) {
+  color: #3A2D00;
+}
+
+.gold-shimmer {
+  animation: gold-shimmer 3.5s linear infinite;
+}
+@keyframes gold-shimmer {
+  to { background-position: 200% center; }
+}
+
+/* ============ SURFACES ============ */
+.surface-card {
+  background: linear-gradient(160deg, #161616 0%, #121212 100%);
+  border: 1px solid rgba(255, 215, 0, 0.07);
+}
+
+.surface-elevated {
+  background: #1b1b1b;
+  border: 1px solid rgba(255, 215, 0, 0.09);
+}
+
+.surface-glass {
+  background: rgba(20, 20, 20, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+/* premium membership card sheen */
+.card-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.card-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 215, 0, 0.09) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.9s ease;
+  pointer-events: none;
+}
+.card-sheen:hover::after {
+  transform: translateX(100%);
+}
+
+/* ============ AMBIENT BRAND BACKGROUND ============ */
+.brand-bg {
+  background-color: #080808;
+  background-image:
+    radial-gradient(ellipse 60% 45% at 50% -10%, rgba(245, 196, 0, 0.055), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 85% 110%, rgba(184, 134, 11, 0.04), transparent 60%);
+}
+
+.grid-texture {
+  background-image:
+    linear-gradient(rgba(255, 215, 0, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 215, 0, 0.022) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ============ SCROLLBAR ============ */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: #0d0d0d; }
+::-webkit-scrollbar-thumb {
+  background: #2a2410;
+  border-radius: 8px;
+  border: 2px solid #0d0d0d;
+}
+::-webkit-scrollbar-thumb:hover { background: #8a6500; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============ SAFE AREA ============ */
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+
+/* ============ INPUT BASE ============ */
+.input-premium {
+  background: #111111;
+  border: 1px solid #262626;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.input-premium:focus {
+  border-color: rgba(245, 196, 0, 0.45);
+  box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.09);
+}
+
+/* ============ ANIMATION UTILITIES ============ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============ EMBLEM 3D (MOKHTAR badge) ============
+   The badge is built like a physical gold coin on a stand:
+   · .emblem-float  — outer wrapper, slow vertical bob (never stops)
+   · .emblem-3d     — the coin itself, one full rotateY revolution every
+                      12s at constant speed (perpetual motion, zero hold)
+   · two stacked faces (front + a 180°-rotated copy) with
+     backface-visibility:hidden — so the coin ALWAYS shows a readable
+     face and never mirrors the wordmark, exactly like a minted coin
+   · the floor shadow breathes in sync with the bob
+   transform-only = GPU composited, no layout cost. */
+.emblem-float {
+  perspective: 620px;
+  animation: emblem-float 5.4s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes emblem-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3.5%); }
+}
+
+.emblem-3d {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: emblem-spin 8s linear infinite;
+  will-change: transform;
+}
+@keyframes emblem-spin {
+  from { transform: rotateX(8deg) rotateY(0deg); }
+  to   { transform: rotateX(8deg) rotateY(360deg); }
+}
+
+/* the two coin faces — only the one facing the viewer is drawn */
+.emblem-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 9999px;
+}
+.emblem-face-back {
+  transform: rotateY(180deg);
+}
+
+/* floor shadow — synced to the bob so the badge feels grounded.
+   Sits BELOW the emblem (needs wrapper padding via emblem-floor). */
+.emblem-float.emblem-floor {
+  /* reserve visual space for the shadow */
+  margin-bottom: 12%;
+}
+.emblem-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -13%;
+  width: 86%;
+  height: 16%;
+  translate: -50% 0;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.28) 42%,
+    transparent 72%
+  );
+  filter: blur(3px);
+  animation: emblem-shadow-pulse 5.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes emblem-shadow-pulse {
+  0%, 100% { transform: translateX(-6%) scaleX(.9); opacity: .62; }
+  50%      { transform: translateX(6%) scaleX(.74); opacity: .42; }
+}
+
+/* pointer-interactive hero instances: the whole coin leans toward the
+   cursor while hovering (the gentle bob pauses, the spin keeps running
+   underneath). JS sets --tiltX/--tiltY custom props on the wrapper. */
+.emblem-interactive {
+  transform: rotateX(var(--tiltX, 0deg)) rotateY(var(--tiltY, 0deg));
+  transition: transform .18s cubic-bezier(.2, .7, .3, 1);
+}
+.emblem-interactive.emblem-hovering {
+  animation: none;
+}
+
+/* soft gold halo sitting behind the badge */
+.emblem-glow {
+  position: absolute;
+  inset: -9%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(245, 196, 0, 0.16) 0%,
+    rgba(245, 196, 0, 0.055) 42%,
+    transparent 68%
+  );
+  pointer-events: none;
+  /* breathing halo — opacity only, safe even under reduced-motion */
+  animation: emblem-glow-pulse 5.6s ease-in-out infinite;
+}
+@keyframes emblem-glow-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+.emblem-img {
+  display: block;
+  border-radius: 9999px;
+}
+
+/* metallic sheen sweeping the face of the badge — stays OUTSIDE the
+   spinning coin, like a specular reflection from the viewer's light */
+.emblem-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: linear-gradient(
+    112deg,
+    transparent 34%,
+    rgba(255, 224, 102, 0.30) 45%,
+    rgba(255, 255, 255, 0.52) 50%,
+    rgba(255, 224, 102, 0.30) 55%,
+    transparent 66%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  pointer-events: none;
+}
+.emblem-sheen-run {
+  opacity: 1;
+  animation: emblem-sweep 7.5s ease-in-out infinite;
+}
+@keyframes emblem-sweep {
+  0%        { background-position: 130% 0; }
+  45%, 100% { background-position: -65% 0; }
+}
+
+/* accessibility: `prefers-reduced-motion` removes the SPATIAL motion
+   (spin / bob / tilt / shadow) — but the badge never looks dead: the
+   metallic sheen sweep and the halo pulse are opacity-only, which do
+   not trigger vestibular issues, so they keep running. This matters
+   because mobile Chrome force-enables reduced-motion in battery-saver
+   mode, and a frozen logo reads as a rendering bug, not as care. */
+@media (prefers-reduced-motion: reduce) {
+  .emblem-float,
+  .emblem-3d,
+  .emblem-shadow {
+    animation: none;
+  }
+  .emblem-shadow {
+    opacity: 0;
+  }
+  .emblem-interactive {
+    transform: none;
+    transition: none;
+  }
+  .emblem-sheen-run {
+    opacity: 1;
+    animation: emblem-sweep 7.5s ease-in-out infinite;
+  }
+  /* glow pulse (opacity-only) intentionally left running */
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 196, 0, 0.35); }
+  60% { box-shadow: 0 0 0 9px rgba(245, 196, 0, 0); }
+}
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer-bg {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.animate-fade-up { animation: fade-up .35s cubic-bezier(.21,.6,.35,1) both; }
+.animate-fade-in { animation: fade-in .3s ease both; }
+.animate-scale-in { animation: scale-in .22s cubic-bezier(.21,.6,.35,1) both; }
+.animate-pulse-gold { animation: pulse-gold 2s ease infinite; }
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #141414 25%, #1e1e1e 50%, #141414 75%);
+  background-size: 800px 100%;
+  animation: shimmer-bg 1.4s infinite linear;
+}
+
+/* stagger delays */
+.stagger-1 { animation-delay: .05s; }
+.stagger-2 { animation-delay: .1s; }
+.stagger-3 { animation-delay: .15s; }
+.stagger-4 { animation-delay: .2s; }
+.stagger-5 { animation-delay: .25s; }
+.stagger-6 { animation-delay: .3s; }
+
+/* ============ NFC PULSE (gate scanning state) ============
+   concentric rings breathing around the NFC mark while the
+   phone waits for the door tag — opacity/transform only */
+.nfc-pulse::before,
+.nfc-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgba(245, 196, 0, 0.55);
+  animation: nfc-ring 1.9s cubic-bezier(.22,.61,.36,1) infinite;
+}
+.nfc-pulse::after { animation-delay: .95s; }
+@keyframes nfc-ring {
+  0%   { transform: scale(.55); opacity: .9; }
+  70%  { transform: scale(1.45); opacity: 0; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* ============ NAV PILL (bottom taskbar) ============
+   active item background — the pill slides between items via
+   framer-motion layoutId, gradient + inner highlight */
+.nav-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, rgba(245,196,0,0.16), rgba(245,196,0,0.07));
+  box-shadow: inset 0 0 0 1px rgba(245,196,0,0.22);
+}
+.nav-pill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 2.5px;
+  border-radius: 9999px;
+  background: #F5C400;
+}
+
+/* ============ ROUTE TRANSITIONS ============
+   A slim gold progress rail runs once on every route arrival
+   (the segment <template> remounts on navigation). It grows from
+   the reading edge, completes, then fades — NProgress-style but
+   brand-made and pure CSS. Sits OUTSIDE the animated content so
+   fixed positioning is never affected by the page transform. */
+.route-progress {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: 2px;
+  z-index: 95;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 196, 0, 0.85) 22%,
+    #ffe066 50%,
+    rgba(245, 196, 0, 0.85) 78%,
+    transparent 100%
+  );
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: route-progress-run .65s cubic-bezier(.22, .61, .36, 1) forwards;
+}
+[dir="rtl"] .route-progress { transform-origin: right center; }
+@keyframes route-progress-run {
+  0%   { transform: scaleX(0);  opacity: 1; }
+  55%  { transform: scaleX(1);  opacity: 1; }
+  100% { transform: scaleX(1);  opacity: 0; }
+}
+
+/* ============ COMMAND TILES (dashboard quick actions) ============
+   Hand-built control-deck tiles: beveled corner, engraved index
+   number, HUD bracket that extends on hover, arrow that lifts.
+   All micro-interactions are transform/opacity only. */
+.cmd-tile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 78px;
+  padding: 12px 14px 11px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.014) 0px,
+      rgba(255, 255, 255, 0.014) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(168deg, #1b1916 0%, #121110 58%, #100f0d 100%);
+  border: 1px solid #2a2716;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  transition:
+    border-color .18s cubic-bezier(.2, .7, .3, 1),
+    transform .16s cubic-bezier(.2, .7, .3, 1),
+    filter .18s cubic-bezier(.2, .7, .3, 1);
+}
+/* the cut corner gets its own gold wash on hover */
+.cmd-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(160deg, rgba(245, 196, 0, 0.12), transparent 45%);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+/* drop-shadow follows the beveled silhouette — box-shadow would be
+   clipped flat by clip-path, so the shadow shows the cut corner */
+.cmd-tile:hover {
+  border-color: rgba(245, 196, 0, 0.5);
+  transform: translateY(-2px);
+  filter:
+    drop-shadow(0 9px 16px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 16px rgba(245, 196, 0, 0.08));
+}
+.cmd-tile:hover::before { opacity: 1; }
+.cmd-tile:active {
+  transform: translateY(0);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.5);
+}
+.cmd-tile:focus-visible {
+  outline: 2px solid rgba(245, 196, 0, 0.6);
+  outline-offset: 2px;
+}
+
+/* HUD corner bracket — an L mark bottom-start that stretches on hover */
+.cmd-bracket {
+  position: absolute;
+  bottom: 6px;
+  inset-inline-start: 7px;
+  width: 9px;
+  height: 9px;
+  border-inline-start: 1.5px solid rgba(245, 196, 0, 0.35);
+  border-bottom: 1.5px solid rgba(245, 196, 0, 0.35);
+  border-end-start-radius: 2px;
+  transform: scale(.62);
+  transform-origin: bottom left;
+  transition: transform .2s cubic-bezier(.2, .7, .3, 1), border-color .18s ease;
+  pointer-events: none;
+}
+[dir="rtl"] .cmd-bracket { transform-origin: bottom right; }
+.cmd-tile:hover .cmd-bracket {
+  transform: scale(1.35);
+  border-color: rgba(245, 196, 0, 0.8);
+}
+
+/* diagonal arrow — lifts toward the cut corner (physical top-right)
+   on hover; the corner is a physical feature, so direction is shared */
+.cmd-arrow {
+  transition: transform .18s cubic-bezier(.2, .7, .3, 1), color .18s ease;
+}
+.cmd-tile:hover .cmd-arrow {
+  transform: translate(2px, -2px);
+  color: #f5c400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmd-tile,
+  .cmd-bracket,
+  .cmd-arrow,
+  .route-progress {
+    transition: none;
+  }
+  .route-progress { display: none; }
+  .cmd-tile:hover { transform: none; }
+  .nfc-pulse::before,
+  .nfc-pulse::after { animation: none; opacity: 0; }
+  .nfc-pulse { border: 2px solid rgba(245,196,0,0.35); border-radius: 9999px; }
+}
+
+/* ============ QR SCANNER ============ */
+.scanner-overlay {
+  position: relative;
+}
+.scanner-frame {
+  border: 2px solid rgba(245, 196, 0, 0.85);
+  border-radius: 14px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+}
+.scanner-line {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  animation: scan-sweep 2.2s ease-in-out infinite;
+}
+@keyframes scan-sweep {
+  0%, 100% { top: 12%; }
+  50% { top: 86%; }
+}
+
+/* ============ RTL ADJUSTMENTS ============ */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* print-friendly */
+@media print {
+  body { background: #fff; color: #000; }
+}
+
+/* ============================================================
+   LIGHT MODE — html.light
+   The platform is dark-first: everything above is the dark theme
+   living in :root. Light mode re-maps the design tokens, inverts
+   the Tailwind neutral scale (914 usages flip automatically), and
+   overrides the dark arbitrary-hex surfaces. One class on <html>
+   re-skins the whole app — no JS repaint, no page reload.
+   Gold buttons keep the bright brand gold (bg-primary), while gold
+   TEXT deepens to #8a6500 for contrast on light surfaces.
+   ============================================================ */
+html.light {
+  color-scheme: light;
+
+  /* --- semantic design tokens --- */
+  --background: #f7f7f9;
+  --foreground: #1a1b1e;
+  --card: #ffffff;
+  --card-foreground: #1a1b1e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1b1e;
+  --secondary: #ebebee;
+  --secondary-foreground: #2c2d31;
+  --muted: #f0f0f3;
+  --muted-foreground: #5c5e64;
+  --accent: #f4edda;
+  --accent-foreground: #7a5c06;
+
+  /* --primary stays the bright brand gold (buttons/fills);
+     gold TEXT is deepened below via .text-primary overrides */
+  --primary: #f5c400;
+  --primary-foreground: #0a0a0a;
+
+  --border: rgba(138, 101, 0, 0.16);
+  --input: #d9dbdf;
+  --ring: rgba(184, 134, 11, 0.4);
+
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --destructive: #dc2626;
+  --info: #2563eb;
+
+  --gold: #8a6500;
+  --gold-bright: #b8860b;
+  --gold-deep: #8a6500;
+  --gold-dark: #6b4f00;
+
+  --chart-1: #b8860b;
+  --chart-2: #8a6500;
+  --chart-3: #c9a227;
+  --chart-4: #9c7508;
+  --chart-5: #d6c184;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3d3e43;
+  --sidebar-primary: #b8860b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4edda;
+  --sidebar-accent-foreground: #7a5c06;
+  --sidebar-border: rgba(0, 0, 0, 0.07);
+  --sidebar-ring: rgba(184, 134, 11, 0.4);
+
+  /* --- Tailwind neutral scale, inverted for light surfaces --- */
+  --color-neutral-50: #0c0c0e;
+  --color-neutral-100: #17181b;
+  --color-neutral-200: #2b2c30;
+  --color-neutral-300: #46474c;
+  --color-neutral-400: #5f6066;
+  --color-neutral-500: #76777d;
+  --color-neutral-600: #8f9096;
+  --color-neutral-700: #abacaf;
+  --color-neutral-800: #d2d3d7;
+  --color-neutral-900: #e6e7ea;
+  --color-neutral-950: #f1f1f3;
+}
+
+/* ---- gold text readable on light backgrounds ---- */
+html.light .text-primary { color: var(--gold); }
+html.light .hover\:text-primary:hover { color: var(--gold); }
+html.light .group:hover .group-hover\:text-primary { color: var(--gold); }
+html.light .group:hover .group-hover\:text-primary\/20 {
+  color: color-mix(in srgb, var(--gold) 20%, transparent);
+}
+html.light .text-primary\/20 { color: color-mix(in srgb, var(--gold) 20%, transparent); }
+html.light .text-primary\/55 { color: color-mix(in srgb, var(--gold) 55%, transparent); }
+html.light .text-primary\/60 { color: color-mix(in srgb, var(--gold) 60%, transparent); }
+html.light .text-primary\/70 { color: color-mix(in srgb, var(--gold) 70%, transparent); }
+html.light .text-primary\/80 { color: color-mix(in srgb, var(--gold) 80%, transparent); }
+html.light .text-primary\/90 { color: color-mix(in srgb, var(--gold) 90%, transparent); }
+html.light .text-primary\/95 { color: color-mix(in srgb, var(--gold) 95%, transparent); }
+html.light .text-\[\#F5C400\] { color: var(--gold); }
+html.light .text-\[\#e3b53e\] { color: var(--gold); }
+
+/* ---- brand surfaces ---- */
+html.light .brand-bg {
+  background-color: #f7f7f9;
+  background-image:
+    radial-gradient(ellipse 60% 45% at 50% -10%, rgba(245, 196, 0, 0.07), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 85% 110%, rgba(184, 134, 11, 0.05), transparent 60%);
+}
+
+html.light .surface-card {
+  background: linear-gradient(160deg, #ffffff 0%, #fafafd 100%);
+  border: 1px solid rgba(138, 101, 0, 0.14);
+  box-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+}
+
+html.light .surface-elevated {
+  background: #ffffff;
+  border: 1px solid rgba(138, 101, 0, 0.16);
+  box-shadow: 0 2px 6px rgba(20, 20, 20, 0.05);
+}
+
+html.light .surface-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(20, 20, 20, 0.04);
+}
+
+html.light .input-premium {
+  background: #ffffff;
+  border: 1px solid #d9dbdf;
+}
+html.light .input-premium:focus {
+  border-color: rgba(184, 134, 11, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.18);
+}
+
+html.light .skeleton-shimmer {
+  background: linear-gradient(90deg, #e6e7ea 25%, #f2f3f5 50%, #e6e7ea 75%);
+  background-size: 800px 100%;
+}
+
+html.light .cmd-tile {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.012) 0px,
+      rgba(0, 0, 0, 0.012) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(168deg, #ffffff 0%, #f7f8fa 58%, #f2f3f5 100%);
+  border: 1px solid #dadce1;
+  filter: drop-shadow(0 2px 3px rgba(20, 20, 20, 0.10));
+}
+
+html.light .gold-text {
+  background: linear-gradient(115deg, #8a6500 0%, #b8860b 35%, #d4a017 50%, #b8860b 65%, #8a6500 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.light .emblem-shadow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(60, 50, 10, 0.28) 0%,
+    rgba(60, 50, 10, 0.12) 42%,
+    transparent 72%
+  );
+}
+
+/* ---- scrollbar ---- */
+html.light ::-webkit-scrollbar-track { background: #ececef; }
+html.light ::-webkit-scrollbar-thumb {
+  background: #c9ccd3;
+  border: 2px solid #ececef;
+}
+html.light ::-webkit-scrollbar-thumb:hover { background: #b8860b; }
+
+/* ---- selection ---- */
+html.light ::selection {
+  background: rgba(245, 196, 0, 0.35);
+  color: #1a1b1e;
+}
+
+/* ---- dark arbitrary-hex surfaces → light equivalents ----
+   (enumerated from the codebase; case-sensitive selectors) */
+html.light .bg-\[\#080808\] { background-color: #f2f2f4; }
+html.light .bg-\[\#0b0b0b\],
+html.light .bg-\[\#0B0B0B\] { background-color: #f4f4f6; }
+html.light .bg-\[\#0d0d0d\] { background-color: #eef0f2; }
+html.light .bg-\[\#0e0e0e\],
+html.light .bg-\[\#0E0E0E\] { background-color: #edeff1; }
+html.light .bg-\[\#121212\] { background-color: #e9ebef; }
+html.light .bg-\[\#131313\] { background-color: #e7e9ed; }
+html.light .bg-\[\#141414\] { background-color: #e5e7eb; }
+html.light .bg-\[\#151515\] { background-color: #e3e5ea; }
+html.light .bg-\[\#161616\] { background-color: #e1e3e8; }
+html.light .bg-\[\#181818\] { background-color: #dfe1e7; }
+html.light .bg-\[\#1a1a1a\] { background-color: #dde0e6; }
+html.light .bg-\[\#1b1b1b\] { background-color: #dbdee5; }
+html.light .bg-\[\#1c1608\] { background-color: #f5eed8; }
+
+html.light .border-\[\#151515\] { border-color: #e3e5ea; }
+html.light .border-\[\#181818\] { border-color: #dfe1e7; }
+html.light .border-\[\#1a1a1a\] { border-color: #dde0e6; }
+html.light .border-\[\#1c1c1c\] { border-color: #dcdee4; }
+html.light .border-\[\#1F1F1F\] { border-color: #d9dbe2; }
+html.light .border-\[\#242424\] { border-color: #d4d6dc; }
+html.light .border-\[\#262626\] { border-color: #d0d3da; }
+html.light .border-\[\#2e2e2e\] { border-color: #c5c8d0; }
+html.light .border-\[\#2E2A1A\],
+html.light .border-\[\#2A2A1E\],
+html.light .border-\[\#2A2A1A\],
+html.light .border-\[\#3A3A28\],
+html.light .border-\[\#3A3625\] { border-color: #e2d9bd; }
+html.light .border-\[\#6b4f00\] { border-color: #c9a227; }
+
+/* dark gold-tinted gradient panels → cream */
+html.light .from-\[\#191307\] { --tw-gradient-from: #fbf6e8; }
+html.light .to-\[\#0E0E0E\] { --tw-gradient-to: #f2ecdc; }
+html.light .bg-\[\#1c1608\] { background-color: #f5eed8; }
+
+/* ---- white overlays → subtle dark overlays on light surfaces ---- */
+html.light .bg-white\/5,
+html.light .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.05); }
+html.light .bg-white\/\[0\.02\],
+html.light .hover\:bg-white\/\[0\.02\]:hover { background-color: rgba(0, 0, 0, 0.02); }
+html.light .bg-white\/\[0\.03\],
+html.light .hover\:bg-white\/\[0\.03\]:hover,
+html.light .bg-white\/\[\.03\],
+html.light .hover\:bg-white\/\[\.03\]:hover { background-color: rgba(0, 0, 0, 0.03); }
+html.light .bg-white\/\[0\.04\],
+html.light .hover\:bg-white\/\[0\.04\]:hover { background-color: rgba(0, 0, 0, 0.04); }
+html.light .bg-white\/\[\.07\] { background-color: rgba(0, 0, 0, 0.06); }
+
+/* ---- brand gradient card (was an inline style, now a class) ---- */
+.gold-tinted-card {
+  background: linear-gradient(160deg, #191510, #0e0c07);
+}
+html.light .gold-tinted-card {
+  background: linear-gradient(160deg, #fbf6e8, #f2ecdc);
+}
